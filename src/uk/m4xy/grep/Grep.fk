@@ -1,0 +1,58 @@
+import uk.m4xy.cli.*
+import uk.m4xy.cli.Arguments.*
+import uk.m4xy.regex.*
+import uk.m4xy.regex.Regexes.*
+
+// What grep takes, and what searching text comes to. Nothing here reads or writes: main does, so
+// this is what's tested.
+module Grep {
+  command: Command<Search> = Command("fk-grep", "Prints the lines of each file that match a pattern, or of standard input if there are no files.", Arguments {
+    fixedStrings by flag("fixed-strings", "take the pattern as text, not a regular expression", short = Some('F'))
+    ignoreCase by flag("ignore-case", "match letters in either case", short = Some('i'))
+    invert by flag("invert-match", "print the lines that don't match", short = Some('v'))
+    wholeWords by flag("word-regexp", "match only whole words", short = Some('w'))
+    count by flag("count", "print how many lines match in each file", short = Some('c'))
+    onlyMatching by flag("only-matching", "print only the parts of lines that match", short = Some('o'))
+    filesWithMatches by flag("files-with-matches", "print only the names of files with a match", short = Some('l'))
+    lineNumbers by flag("line-number", "put each line's number before it", short = Some('n'))
+    noFilename by flag("no-filename", "don't put the file's name before each line", short = Some('h'))
+    pattern by argument("PATTERN", "the regular expression to look for")
+    files by arguments("FILE", "the files to search")
+    Search(
+      pattern,
+      files,
+      fixedStrings,
+      ignoreCase,
+      invert,
+      wholeWords,
+      if (filesWithMatches) FileNames else if (count) Count else if (onlyMatching) OnlyMatching else Lines,
+      lineNumbers,
+      files.size > 1 && !noFilename,
+    )
+  })
+
+  // The regular expression the search looks for, or why its pattern isn't one.
+  regexOf(search: Search): Result<Regex, RegexError> = {
+    written = if (search.fixedStrings) escape(search.pattern) else search.pattern
+    worded = if (search.wholeWords) "\\b(?:$written)\\b" else written
+    regex(if (search.ignoreCase) "(?i)$worded" else worded)
+  }
+
+  // What searching the source comes to.
+  searched(search: Search, regex: Regex, source: Source): Found = {
+    numbered = source.lines.withIndex().map { i, line -> (i + 1, line) }
+    hits = numbered.filter { _, line -> regex.containsMatchIn(line) != search.invert }
+    output = when (search.report) {
+      Lines -> hits.map { n, line -> prefix(search, source, n) + line }
+      OnlyMatching -> if (search.invert) [] else hits.flatMap { n, line -> regex.findAll(line).filter { it.value.isNotEmpty() }.map { m -> prefix(search, source, n) + m.value } }
+      Count -> [(if (search.withNames) "${source.name}:" else "") + hits.size.toString()]
+      FileNames -> if (hits.isEmpty()) [] else [source.name]
+    }
+    Found(output, hits.isNotEmpty())
+  }
+
+  // What comes before a line: the file's name, if there's more than one file, and its number, if
+  // asked for.
+  private prefix(search: Search, source: Source, number: Int): String =
+    (if (search.withNames) "${source.name}:" else "") + (if (search.lineNumbers) "$number:" else "")
+}

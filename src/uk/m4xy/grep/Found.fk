@@ -1,0 +1,2 @@
+// What searching a source came to: the lines to print, and whether any line matched.
+type Found(output: List<String>, matched: Boolean)

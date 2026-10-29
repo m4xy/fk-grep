@@ -1,0 +1,13 @@
+// fk-grep: searching text for lines that match a pattern, as grep does, in fckt. kiln build makes
+// build/bin/fk-grep.
+import uk.m4xy.kiln.fckt.Fckt
+import uk.m4xy.fktests.kiln.*
+
+project = Project(
+  name = "fk-grep",
+  group = "uk.m4xy",
+  version = "0.1.0",
+  dependencies = [library("uk.m4xy:fk-regex:0.1.0"), library("uk.m4xy:fk-cli:0.1.0")],
+)
+
+plugins = [Fckt(), FkTests()]

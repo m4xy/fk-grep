@@ -1,0 +1,54 @@
+import uk.m4xy.fktests.api.Test
+import uk.m4xy.cli.*
+import uk.m4xy.grep.*
+import uk.m4xy.regex.*
+import fckt.effects.Fail
+
+// What searching comes to, for what the command line asks.
+
+poem: Source = Source("poem.txt", ["The cat sat", "on the mat;", "a concatenated", "CAT."])
+
+// What searching the poem comes to, with the command line's options and the pattern.
+@Fail grep(args: List<String>): Found = grepIn(args, poem)
+
+@Fail grepIn(args: List<String>, source: Source): Found = when (Cli.read(Grep.command, args + [source.name])) {
+  Read(search) -> when (Grep.regexOf(search)) {
+    Ok(regex) -> Grep.searched(search, regex, source)
+    Error(e) -> fail(e.message)
+  }
+  other -> fail("$other")
+}
+
+@Test @Fail printsTheLinesThatMatch() = assertEquals(Found(["The cat sat", "a concatenated"], true), grep(["cat"]))
+
+@Test @Fail noMatchIsNotMatched() = assertEquals(Found([], false), grep(["dog"]))
+
+@Test @Fail ignoringCase() = assertEquals(["The cat sat", "a concatenated", "CAT."], grep(["-i", "cat"]).output)
+
+@Test @Fail wholeWords() = assertEquals(["The cat sat", "CAT."], grep(["-iw", "cat"]).output)
+
+@Test @Fail inverting() = assertEquals(["on the mat;", "CAT."], grep(["-v", "cat"]).output)
+
+@Test @Fail numbering() = assertEquals(["2:on the mat;"], grep(["-n", "mat"]).output)
+
+@Test @Fail onlyTheMatches() = assertEquals(["cat", "at", "at", "cat", "at"], grep(["-o", "c?at"]).output)
+
+@Test @Fail counting() = assertEquals(Found(["2"], true), grep(["-c", "cat"]))
+
+@Test @Fail countingNothingStillSaysSo() = assertEquals(Found(["0"], false), grep(["-c", "dog"]))
+
+@Test @Fail fileNames() = assertEquals(["poem.txt"], grep(["-l", "mat"]).output)
+
+@Test @Fail fixedStrings() = {
+  assertEquals(["on the mat;"], grep(["-F", "t;"]).output)
+  assertEquals([], grep(["-F", "c.t"]).output)
+  assertEquals(["The cat sat", "a concatenated"], grep(["c.t"]).output)
+}
+
+@Test @Fail withSeveralFilesEachLineSaysWhere() = when (Cli.read(Grep.command, ["-n", "mat", "poem.txt", "other.txt"])) {
+  Read(search) -> when (Grep.regexOf(search)) {
+    Ok(regex) -> assertEquals(["poem.txt:2:on the mat;"], Grep.searched(search, regex, poem).output)
+    Error(e) -> fail(e.message)
+  }
+  other -> fail("$other")
+}

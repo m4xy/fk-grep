@@ -1,0 +1,11 @@
+// What's said of each file searched.
+type Report {
+  // Each line that matches.
+  Lines,
+  // Only the parts of each line that match, a line each.
+  OnlyMatching,
+  // How many lines match.
+  Count,
+  // The file's name, if any line matches.
+  FileNames,
+}

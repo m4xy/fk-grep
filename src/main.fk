@@ -1,0 +1,42 @@
+import uk.m4xy.cli.*
+import uk.m4xy.grep.*
+import uk.m4xy.regex.*
+import fckt.io.Channels.*
+import fckt.io.Process
+import fckt.io.Console
+import fckt.io.FileSystem
+import fckt.io.Paths.*
+import fckt.text.Encodings.*
+
+// fk-grep PATTERN FILE...: prints the lines that match. Its exit code is grep's: 0 if a line matched,
+// 1 if none did, and 2 if something went wrong, as a file that can't be read, though the others are
+// still searched.
+main(args: List<String>) = Cli.run(Grep.command, args) { search ->
+  when (Grep.regexOf(search)) {
+    Error(e) -> {
+      printError("fk-grep: ${e.message}, at ${e.at} in /${search.pattern}/")
+      exit(2)
+    }
+    Ok(regex) -> {
+      sources = if (search.files.isEmpty()) [Ok(Source("(standard input)", readingFrom(standardInput) { remainingLines() }))]
+        else search.files.map { name -> tryReadBytes(path(name)).map { bytes -> Source(name, linesOf(bytes.decodeToString())) } }
+      outcomes = sources.map { source ->
+        when (source) {
+          Ok(s) -> {
+            found = Grep.searched(search, regex, s)
+            found.output.forEach { println(it) }
+            Ok(found.matched)
+          }
+          Error(why) -> {
+            printError("fk-grep: $why")
+            Error(why)
+          }
+        }
+      }
+      exit(if (outcomes.any { it.isError() }) 2 else if (outcomes.any { it == Ok(true) }) 0 else 1)
+    }
+  }
+}
+
+// The text's lines: a line's end ends it, rather than starting another.
+linesOf(text: String): List<String> = if (text.isEmpty()) [] else text.removeSuffix("\n").lines()

@@ -1,0 +1,2 @@
+// Text that's searched: its name, as what's found shows it, and its lines.
+type Source(name: String, lines: List<String>)

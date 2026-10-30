@@ -19,5 +19,5 @@ grep's `-F -i -v -w -c -o -l -n -h`, reads standard input when there are no file
 does: 0 if a line matched, 1 if none did, and 2 if something went wrong, as a file that can't be read
 or a pattern that isn't one, having searched the files it could.
 
-It needs fckt's `Channels.standardInput` and `printError`, on the branch `std-standard-streams`.
+It needs fckt's `Channels.standardInput` and `printError`, on the branch `std-standard-streams`, and fk-regex, which uses ranges, from the branch `ranges` above it.
 `kiln build` runs the tests in `test/`, which search text in memory through `Grep`.

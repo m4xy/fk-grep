@@ -8,9 +8,6 @@ import fckt.io.FileSystem
 import fckt.io.Paths.*
 import fckt.text.Encodings.*
 
-// fk-grep PATTERN FILE...: prints the lines that match. Its exit code is grep's: 0 if a line matched,
-// 1 if none did, and 2 if something went wrong, as a file that can't be read, though the others are
-// still searched.
 main(args: List<String>) = Cli.run(Grep.command, args) { search ->
   when (Grep.regexOf(search)) {
     Error(e) -> {
@@ -38,5 +35,4 @@ main(args: List<String>) = Cli.run(Grep.command, args) { search ->
   }
 }
 
-// The text's lines: a line's end ends it, rather than starting another.
 linesOf(text: String): List<String> = if (text.isEmpty()) [] else text.removeSuffix("\n").lines()

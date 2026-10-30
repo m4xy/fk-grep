@@ -3,8 +3,6 @@ import uk.m4xy.cli.Arguments.*
 import uk.m4xy.regex.*
 import uk.m4xy.regex.Regexes.*
 
-// What grep takes, and what searching text comes to. Nothing here reads or writes: main does, so
-// this is what's tested.
 module Grep {
   command: Command<Search> = Command("fk-grep", "Prints the lines of each file that match a pattern, or of standard input if there are no files.", Arguments {
     fixedStrings by flag("fixed-strings", "take the pattern as text, not a regular expression", short = Some('F'))
@@ -31,14 +29,12 @@ module Grep {
     )
   })
 
-  // The regular expression the search looks for, or why its pattern isn't one.
   regexOf(search: Search): Result<Regex, RegexError> = {
     written = if (search.fixedStrings) escape(search.pattern) else search.pattern
     worded = if (search.wholeWords) "\\b(?:$written)\\b" else written
     regex(if (search.ignoreCase) "(?i)$worded" else worded)
   }
 
-  // What searching the source comes to.
   searched(search: Search, regex: Regex, source: Source): Found = {
     numbered = source.lines.withIndex().map { i, line -> (i + 1, line) }
     hits = numbered.filter { _, line -> regex.containsMatchIn(line) != search.invert }
@@ -51,8 +47,6 @@ module Grep {
     Found(output, hits.isNotEmpty())
   }
 
-  // What comes before a line: the file's name, if there's more than one file, and its number, if
-  // asked for.
   private prefix(search: Search, source: Source, number: Int): String =
     (if (search.withNames) "${source.name}:" else "") + (if (search.lineNumbers) "$number:" else "")
 }

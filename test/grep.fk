@@ -4,11 +4,8 @@ import uk.m4xy.grep.*
 import uk.m4xy.regex.*
 import fckt.effects.Fail
 
-// What searching comes to, for what the command line asks.
-
 poem: Source = Source("poem.txt", ["The cat sat", "on the mat;", "a concatenated", "CAT."])
 
-// What searching the poem comes to, with the command line's options and the pattern.
 @Fail grep(args: List<String>): Found = grepIn(args, poem)
 
 @Fail grepIn(args: List<String>, source: Source): Found = when (Cli.read(Grep.command, args + [source.name])) {

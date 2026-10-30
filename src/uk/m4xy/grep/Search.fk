@@ -1,5 +1,3 @@
-// A search, as the command line asks for it: the pattern, the files to search, none meaning standard
-// input, and how to search them and say what's found.
 type Search(
   pattern: String,
   files: List<String>,

@@ -8,7 +8,10 @@ poem: Source = Source("poem.txt", ["The cat sat", "on the mat;", "a concatenated
 
 @Fail grep(args: List<String>): Found = grepIn(args, poem)
 
-@Fail grepIn(args: List<String>, source: Source): Found = when (Cli.read(Grep.command, args + [source.name])) {
+@Fail grepIn(
+  args: List<String>,
+  source: Source,
+): Found = when (Cli.read(Grep.command, args + [source.name])) {
   Read(search) -> when (Grep.regexOf(search)) {
     Ok(regex) -> Grep.searched(search, regex, source)
     Error(e) -> fail(e.message)
@@ -16,11 +19,17 @@ poem: Source = Source("poem.txt", ["The cat sat", "on the mat;", "a concatenated
   other -> fail("$other")
 }
 
-@Test @Fail printsTheLinesThatMatch() = assertEquals(Found(["The cat sat", "a concatenated"], true), grep(["cat"]))
+@Test @Fail printsTheLinesThatMatch() = assertEquals(
+  Found(["The cat sat", "a concatenated"], true),
+  grep(["cat"]),
+)
 
 @Test @Fail noMatchIsNotMatched() = assertEquals(Found([], false), grep(["dog"]))
 
-@Test @Fail ignoringCase() = assertEquals(["The cat sat", "a concatenated", "CAT."], grep(["-i", "cat"]).output)
+@Test @Fail ignoringCase() = assertEquals(
+  ["The cat sat", "a concatenated", "CAT."],
+  grep(["-i", "cat"]).output,
+)
 
 @Test @Fail wholeWords() = assertEquals(["The cat sat", "CAT."], grep(["-iw", "cat"]).output)
 
@@ -28,7 +37,10 @@ poem: Source = Source("poem.txt", ["The cat sat", "on the mat;", "a concatenated
 
 @Test @Fail numbering() = assertEquals(["2:on the mat;"], grep(["-n", "mat"]).output)
 
-@Test @Fail onlyTheMatches() = assertEquals(["cat", "at", "at", "cat", "at"], grep(["-o", "c?at"]).output)
+@Test @Fail onlyTheMatches() = assertEquals(
+  ["cat", "at", "at", "cat", "at"],
+  grep(["-o", "c?at"]).output,
+)
 
 @Test @Fail counting() = assertEquals(Found(["2"], true), grep(["-c", "cat"]))
 

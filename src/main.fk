@@ -15,7 +15,9 @@ main(args: List<String>) = Cli.run(Grep.command, args) { search ->
       exit(2)
     }
     Ok(regex) -> {
-      sources = if (search.files.isEmpty()) [Ok(Source("(standard input)", readingFrom(standardInput) { remainingLines() }))]
+      sources = if (search.files.isEmpty()) [
+        Ok(Source("(standard input)", readingFrom(standardInput) { remainingLines() })),
+      ]
         else search.files.map { name -> tryReadBytes(path(name)).map { bytes -> Source(name, linesOf(bytes.decodeToString())) } }
       outcomes = sources.map { source ->
         when (source) {

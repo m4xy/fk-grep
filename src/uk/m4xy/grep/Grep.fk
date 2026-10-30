@@ -5,15 +5,31 @@ import uk.m4xy.regex.Regexes.*
 
 module Grep {
   command: Command<Search> = Command("fk-grep", "Prints the lines of each file that match a pattern, or of standard input if there are no files.", Arguments {
-    fixedStrings by flag("fixed-strings", "take the pattern as text, not a regular expression", short = Some('F'))
+    fixedStrings by flag(
+      "fixed-strings",
+      "take the pattern as text, not a regular expression",
+      short = Some('F'),
+    )
     ignoreCase by flag("ignore-case", "match letters in either case", short = Some('i'))
     invert by flag("invert-match", "print the lines that don't match", short = Some('v'))
     wholeWords by flag("word-regexp", "match only whole words", short = Some('w'))
     count by flag("count", "print how many lines match in each file", short = Some('c'))
-    onlyMatching by flag("only-matching", "print only the parts of lines that match", short = Some('o'))
-    filesWithMatches by flag("files-with-matches", "print only the names of files with a match", short = Some('l'))
+    onlyMatching by flag(
+      "only-matching",
+      "print only the parts of lines that match",
+      short = Some('o'),
+    )
+    filesWithMatches by flag(
+      "files-with-matches",
+      "print only the names of files with a match",
+      short = Some('l'),
+    )
     lineNumbers by flag("line-number", "put each line's number before it", short = Some('n'))
-    noFilename by flag("no-filename", "don't put the file's name before each line", short = Some('h'))
+    noFilename by flag(
+      "no-filename",
+      "don't put the file's name before each line",
+      short = Some('h'),
+    )
     pattern by argument("PATTERN", "the regular expression to look for")
     files by arguments("FILE", "the files to search")
     Search(
